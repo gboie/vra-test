@@ -1,0 +1,4 @@
+# Small helper image used by ops scripts.
+FROM alpine
+RUN apk add --no-cache curl jq
+ENTRYPOINT ["jq"]

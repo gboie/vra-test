@@ -1,0 +1,12 @@
+{
+  "name": "vra-test-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend helpers (deliberately outdated dependency)",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "lodash": "4.17.15"
+  }
+}
