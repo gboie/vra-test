@@ -40,8 +40,12 @@ jobs:
           node-version: "20"
 
       - name: Install VRA+ CLI
+        env:
+          # gboie/vra is private: a token that can read its releases is needed.
+          # (Once the repo is public this can be dropped.)
+          GH_TOKEN: ${{ secrets.VRA_DOWNLOAD_TOKEN }}
         run: |
-          curl -fsSL -o vra "https://github.com/gboie/vra/releases/download/${VRA_VERSION}/vra-linux-amd64"
+          gh release download "$VRA_VERSION" --repo gboie/vra --pattern vra-linux-amd64 --output vra
           chmod +x vra && sudo mv vra /usr/local/bin/vra
           vra --version
 
