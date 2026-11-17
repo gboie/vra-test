@@ -1,0 +1,73 @@
+name: VRA+ remediation
+
+# Scans the repository and opens / updates fix PRs with the VRA+ CLI.
+on:
+  workflow_dispatch:          # "Run workflow" button
+  schedule:
+    - cron: "0 6 * * 1"       # every Monday 06:00 UTC
+  push:
+    branches: [main]          # e.g. after a VRA+ PR is merged
+
+permissions:
+  contents: write             # push the vra/* branches
+  pull-requests: write        # open / update the PRs
+  issues: write               # open / update the secrets issue
+
+concurrency:
+  group: vra-remediation      # never two runs at once
+  cancel-in-progress: false
+
+env:
+  VRA_VERSION: v0.4.0
+
+jobs:
+  remediate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          # A personal access token (secret VRA_TOKEN) makes the PRs trigger this
+          # repo's CI; the default token works too, but its PRs don't run CI.
+          token: ${{ secrets.VRA_TOKEN || github.token }}
+
+      # Toolchains VRA+ uses to prove each fix builds and passes the tests.
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20"
+
+      - name: Install VRA+ CLI
+        run: |
+          curl -fsSL -o vra "https://github.com/gboie/vra/releases/download/${VRA_VERSION}/vra-linux-amd64"
+          chmod +x vra && sudo mv vra /usr/local/bin/vra
+          vra --version
+
+      - name: Scan
+        run: vra scan --scanner all --severity MEDIUM --no-fail .
+
+      - name: Remediate and open PRs
+        env:
+          GITHUB_TOKEN: ${{ secrets.VRA_TOKEN || github.token }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          # Exit code 2 = some fixes need a human (draft PRs opened) — not a failure here.
+          vra remediate --open-pr || [ $? -eq 2 ]
+
+      - name: Summary
+        if: always()
+        run: |
+          for f in vra-reports/pr-*.md vra-reports/secrets-*.md; do
+            [ -f "$f" ] && { cat "$f"; echo; } >> "$GITHUB_STEP_SUMMARY"
+          done
+          true
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: vra-reports
+          path: vra-reports/
+          retention-days: 14
