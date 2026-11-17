@@ -1,5 +1,5 @@
 FROM python:3.12-slim
-MAINTAINER VRA Test <test@example.com>
+LABEL maintainer="VRA Test <test@example.com>"
 
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
