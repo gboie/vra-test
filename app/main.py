@@ -27,7 +27,7 @@ def disk_usage(path: str) -> str:
 
 
 def fetch_status(url: str) -> int:
-    return requests.get(url, timeout=5, verify=False).status_code
+    return requests.get(url, timeout=5, verify=True).status_code
 
 
 def admin_ok(password: str) -> bool:
