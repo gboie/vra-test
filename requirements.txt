@@ -1,6 +1,6 @@
 # Web service dependencies (deliberately outdated)
 Flask==2.2.5
-Werkzeug==2.2.2
+Werkzeug==3.1.9
 Jinja2==3.1.6
 requests==2.33.0
 urllib3==2.8.0
