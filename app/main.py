@@ -23,7 +23,7 @@ def token():
 
 
 def disk_usage(path: str) -> str:
-    return subprocess.run(["du", "-sh", path], shell=True, capture_output=True, text=True).stdout
+    return subprocess.run(["du", "-sh", path], shell=False, capture_output=True, text=True).stdout
 
 
 def fetch_status(url: str) -> int:
