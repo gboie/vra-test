@@ -23,11 +23,11 @@ def token():
 
 
 def disk_usage(path: str) -> str:
-    return subprocess.run(["du", "-sh", path], shell=True, capture_output=True, text=True).stdout
+    return subprocess.run(["du", "-sh", path], shell=False, capture_output=True, text=True).stdout
 
 
 def fetch_status(url: str) -> int:
-    return requests.get(url, timeout=5, verify=False).status_code
+    return requests.get(url, timeout=5, verify=True).status_code
 
 
 def admin_ok(password: str) -> bool:
